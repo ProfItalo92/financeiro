@@ -1,71 +1,147 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f4f8;
-    color: #333;
-    margin: 0;
-    padding: 20px;
+:root {
+  --cor-fundo: #f4f7f9;
+  --cor-primaria: #2e7d32;
+  --cor-secundaria: #c62828;
+  --cor-azul: #1565c0;
+  --cor-fonte: #333;
+  --cor-clara: #ffffff;
+  --sombra: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --radius: 12px;
 }
 
-.container {
-    max-width: 900px;
-    margin: auto;
-    background: #fff;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: var(--cor-fundo);
+  color: var(--cor-fonte);
+  line-height: 1.5;
+}
+
+header {
+  position: relative;
+  height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: black;
+  overflow: hidden;
+  box-shadow: var(--sombra);
+}
+
+header::before {
+  content: "";
+  background-image: url('img/controle-financeiro.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.10;
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  z-index: 0;
+}
+
+header h1 {
+  position: relative;
+  z-index: 1;
+  background-color: rgba(255, 255, 255, 0.052);
+  padding: 1rem 2rem;
+  border-radius: var(--radius);
+  font-size: 2.5rem;
+}
+
+main {
+  padding: 2rem;
+  max-width: 1000px;
+  margin: auto;
 }
 
 h1, h2 {
-    text-align: center;
+  margin-bottom: 1rem;
 }
 
-form, .filtro-mes {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
+.form-section, .table-section {
+  background-color: var(--cor-clara);
+  padding: 2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--sombra);
+  margin-bottom: 2rem;
 }
 
-input, select, button {
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #ccc;
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-button {
-    cursor: pointer;
-    background-color: #4a90e2;
-    color: white;
-    border: none;
+form input, form select, form button {
+  flex: 1 1 180px;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: var(--radius);
 }
 
-button:hover {
-    background-color: #357ab7;
+form button {
+  background-color: var(--cor-primaria);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+form button:hover {
+  background-color: #1b5e20;
 }
 
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+thead {
+  background-color: var(--cor-azul);
+  color: white;
 }
 
 th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  text-align: center;
 }
 
-canvas {
-    width: 100%;
-    max-height: 350px;
-    margin-top: 20px;
+tfoot {
+  font-weight: bold;
+  background-color: #e8f5e9;
 }
 
-@media print {
-    form, button, .filtro-mes, canvas {
-        display: none;
-    }
-    .container {
-        box-shadow: none;
-    }
+button {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  margin-top: 1rem;
+  cursor: pointer;
+}
+
+button[onclick*='exportarPlanilha'] {
+  background-color: var(--cor-azul);
+  color: white;
+  border: none;
+}
+
+button[onclick*='imprimirPlanilha'] {
+  background-color: var(--cor-secundaria);
+  color: white;
+  border: none;
+}
+
+button.editar {
+  background-color: #ffa000;
+  color: white;
+  padding: 0.3rem 0.6rem;
+  border: none;
+}
+
+button.remover {
+  background-color: #d32f2f;
+  color: white;
+  padding: 0.3rem 0.6rem;
+  border: none;
 }

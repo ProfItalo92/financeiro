@@ -1,161 +1,167 @@
-document.addEventListener('DOMContentLoaded', () => {
-    definirDataAtual();
-    atualizarTabela(financas);
-    gerarGrafico(financas);
+let dadosFinanceiros = [];
+let idAtual = 1;
+
+// Carregar dados do localStorage
+if (localStorage.getItem('financeiros')) {
+  dadosFinanceiros = JSON.parse(localStorage.getItem('financeiros'));
+  idAtual = dadosFinanceiros.length > 0 ? Math.max(...dadosFinanceiros.map(i => i.id)) + 1 : 1;
+  atualizarTabela();
+}
+
+document.getElementById('finance-form').addEventListener('submit', function (e) {
+  e.preventDefault();
+  tocarSom('click-sound');
+
+  const descricao = document.getElementById('descricao').value;
+  const valor = parseFloat(document.getElementById('valor').value).toFixed(2);
+  const tipo = document.getElementById('tipo').value;
+  const data = document.getElementById('data').value;
+
+  if (descricao && valor && data) {
+    const entrada = {
+      id: idAtual++,
+      descricao,
+      valor: parseFloat(valor),
+      tipo,
+      data
+    };
+
+    dadosFinanceiros.push(entrada);
+    atualizarTabela();
+    tocarSom('success-sound');
+    this.reset();
+  }
 });
 
-document.getElementById('form-financas').addEventListener('submit', adicionarItem);
+function atualizarTabela() {
+  const tbody = document.querySelector('#tabela-balancete tbody');
+  const totalDebito = document.getElementById('total-debito');
+  const totalCredito = document.getElementById('total-credito');
+  tbody.innerHTML = '';
 
-let financas = JSON.parse(localStorage.getItem('financas')) || [];
+  let debito = 0;
+  let credito = 0;
 
-function definirDataAtual() {
-    const hoje = new Date();
-    const ano = hoje.getFullYear();
-    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-    const dia = String(hoje.getDate()).padStart(2, '0');
-    document.getElementById('data').value = `${ano}-${mes}-${dia}`;
+  dadosFinanceiros.forEach((item) => {
+    const tr = document.createElement('tr');
+    const valorDebito = item.tipo === 'despesa' ? item.valor.toFixed(2) : '';
+    const valorCredito = item.tipo === 'receita' ? item.valor.toFixed(2) : '';
+
+    if (item.tipo === 'despesa') debito += item.valor;
+    else if (item.tipo === 'receita') credito += item.valor;
+
+    tr.innerHTML = `
+      <td>${item.id}</td>
+      <td>${item.descricao}</td>
+      <td>${valorDebito ? 'R$ ' + valorDebito : ''}</td>
+      <td>${valorCredito ? 'R$ ' + valorCredito : ''}</td>
+      <td>${item.data}</td>
+      <td>
+        <button class="editar" onclick="editarRegistro(${item.id})">Editar</button>
+        <button class="remover" onclick="removerRegistro(${item.id})">Remover</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  totalDebito.textContent = `R$ ${debito.toFixed(2)}`;
+  totalCredito.textContent = `R$ ${credito.toFixed(2)}`;
+
+  // Salvar no localStorage
+  localStorage.setItem('financeiros', JSON.stringify(dadosFinanceiros));
 }
 
-function adicionarItem(e) {
-    e.preventDefault();
+function editarRegistro(id) {
+  const item = dadosFinanceiros.find((i) => i.id === id);
+  if (item) {
+    document.getElementById('descricao').value = item.descricao;
+    document.getElementById('valor').value = item.valor;
+    document.getElementById('tipo').value = item.tipo;
+    document.getElementById('data').value = item.data;
 
-    const data = document.getElementById('data').value;
-    const descricao = document.getElementById('descricao').value.trim();
-    const valor = parseFloat(document.getElementById('valor').value);
-    const tipo = document.getElementById('tipo').value;
-
-    if (!descricao || isNaN(valor)) {
-        alert('Preencha todos os campos corretamente.');
-        return;
-    }
-
-    financas.push({ data, descricao, valor, tipo });
-    localStorage.setItem('financas', JSON.stringify(financas));
-
-    atualizarTabela(financas);
-    gerarGrafico(financas);
-    document.getElementById('form-financas').reset();
-    definirDataAtual();
-}
-
-function atualizarTabela(dados) {
-    const tbody = document.querySelector('#tabela-financas tbody');
-    tbody.innerHTML = '';
-    let total = 0;
-
-    dados.forEach((item, index) => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${item.data.split('-').reverse().join('/')}</td>
-                <td>${item.descricao}</td>
-                <td>${item.tipo === 'receita' ? 'Receita' : 'Despesa'}</td>
-                <td>${item.valor.toFixed(2)}</td>
-                <td><button onclick="removerItem(${index})">Excluir</button></td>
-            </tr>
-        `;
-
-        total += item.tipo === 'receita' ? item.valor : -item.valor;
-    });
-
-    document.getElementById('balanco-total').textContent = `R$ ${total.toFixed(2)}`;
-}
-
-function removerItem(index) {
-    financas.splice(index, 1);
-    localStorage.setItem('financas', JSON.stringify(financas));
-    atualizarTabela(financas);
-    gerarGrafico(financas);
-}
-
-function filtrarMes() {
-    const filtro = document.getElementById('filtro-mes').value;
-    if (!filtro) return;
-
-    const dadosFiltrados = financas.filter(i => i.data.startsWith(filtro));
-    atualizarTabela(dadosFiltrados);
-    gerarGrafico(dadosFiltrados);
-}
-
-function limparFiltro() {
-    document.getElementById('filtro-mes').value = '';
-    atualizarTabela(financas);
-    gerarGrafico(financas);
-}
-
-let grafico;
-
-function gerarGrafico(dados) {
-    const ctx = document.getElementById('grafico-financas').getContext('2d');
-    if (grafico) grafico.destroy();
-
-    // Agrupar valores por mês/ano
-    const valoresPorMes = {};
-    
-    dados.forEach(({ data, valor, tipo }) => {
-        const [ano, mes] = data.split('-');
-        const chave = `${mes}/${ano}`;
-        
-        if (!valoresPorMes[chave]) {
-            valoresPorMes[chave] = { receita: 0, despesa: 0 };
-        }
-
-        if (tipo === 'receita') {
-            valoresPorMes[chave].receita += valor;
-        } else {
-            valoresPorMes[chave].despesa += valor;
-        }
-    });
-
-    // Separar os dados para o gráfico
-    const labels = Object.keys(valoresPorMes).sort((a, b) => {
-        const [mesA, anoA] = a.split('/');
-        const [mesB, anoB] = b.split('/');
-        return new Date(`${anoA}-${mesA}-01`) - new Date(`${anoB}-${mesB}-01`);
-    });
-
-    const receitas = labels.map(label => valoresPorMes[label].receita);
-    const despesas = labels.map(label => valoresPorMes[label].despesa);
-
-    // Criar gráfico de linha
-    grafico = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [
-                {
-                    label: 'Receitas',
-                    data: receitas,
-                    borderColor: '#38a169',
-                    backgroundColor: 'rgba(56, 161, 105, 0.2)',
-                    fill: true,
-                    tension: 0.3
-                },
-                {
-                    label: 'Despesas',
-                    data: despesas,
-                    borderColor: '#e53e3e',
-                    backgroundColor: 'rgba(229, 62, 62, 0.2)',
-                    fill: true,
-                    tension: 0.3
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: true, position: 'top' },
-                title: { display: true, text: 'Receitas e Despesas por Mês/Ano' }
-            },
-            scales: {
-                x: { title: { display: true, text: 'Mês/Ano' } },
-                y: { title: { display: true, text: 'Valor (R$)' } }
-            }
-        }
-    });
-}
-
-function removerItem(index) {
-    financas.splice(index, 1);
-    localStorage.setItem('financas', JSON.stringify(financas));
+    dadosFinanceiros = dadosFinanceiros.filter((i) => i.id !== id);
     atualizarTabela();
+  }
+}
+
+function removerRegistro(id) {
+  dadosFinanceiros = dadosFinanceiros.filter((i) => i.id !== id);
+  atualizarTabela();
+}
+
+function exportarPlanilha() {
+  let csv = 'ID,Descrição,Débito (R$),Crédito (R$),Data\n';
+  let totalDebito = 0;
+  let totalCredito = 0;
+
+  dadosFinanceiros.forEach(item => {
+    const debito = item.tipo === 'despesa' ? item.valor.toFixed(2) : '';
+    const credito = item.tipo === 'receita' ? item.valor.toFixed(2) : '';
+    if (item.tipo === 'despesa') totalDebito += item.valor;
+    else if (item.tipo === 'receita') totalCredito += item.valor;
+
+    csv += `${item.id},"${item.descricao}",${debito},${credito},${item.data}\n`;
+  });
+
+  csv += `,,R$ ${totalDebito.toFixed(2)},R$ ${totalCredito.toFixed(2)},\n`;
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'balancete-contabil.csv';
+  link.click();
+}
+
+function imprimirPlanilha() {
+  const win = window.open('', '', 'width=900,height=700');
+  let debito = 0;
+  let credito = 0;
+
+  let html = `
+    <html><head><title>Balancete Contábil</title>
+      <style>
+        body { font-family: Arial; padding: 30px; }
+        h2 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background-color: #1565c0; color: white; }
+        tfoot td { font-weight: bold; background-color: #e8f5e9; }
+      </style>
+    </head><body>
+      <h2>Balancete Contábil<br>Mês de Vigência: ${new Date().toLocaleDateString('pt-BR')}</h2>
+      <table><thead>
+        <tr><th>ID</th><th>Descrição</th><th>Débito (R$)</th><th>Crédito (R$)</th><th>Data</th></tr>
+      </thead><tbody>`;
+
+  dadosFinanceiros.forEach(item => {
+    const debitoVal = item.tipo === 'despesa' ? item.valor.toFixed(2) : '';
+    const creditoVal = item.tipo === 'receita' ? item.valor.toFixed(2) : '';
+    if (item.tipo === 'despesa') debito += item.valor;
+    else if (item.tipo === 'receita') credito += item.valor;
+
+    html += `<tr>
+      <td>${item.id}</td>
+      <td>${item.descricao}</td>
+      <td>${debitoVal ? 'R$ ' + debitoVal : ''}</td>
+      <td>${creditoVal ? 'R$ ' + creditoVal : ''}</td>
+      <td>${item.data}</td>
+    </tr>`;
+  });
+
+  html += `
+    </tbody><tfoot>
+      <tr><td colspan="2">Totais</td>
+      <td>R$ ${debito.toFixed(2)}</td>
+      <td>R$ ${credito.toFixed(2)}</td>
+      <td></td></tr>
+    </tfoot></table></body></html>`;
+
+  win.document.write(html);
+  win.document.close();
+  win.print();
+}
+
+function tocarSom(id) {
+  const som = document.getElementById(id);
+  if (som) som.play();
 }
