@@ -30,7 +30,7 @@ header {
 
 header::before {
   content: "";
-  background-image: url('img/controle-financeiro.png');
+  background-image: url('controle-financeiro.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
