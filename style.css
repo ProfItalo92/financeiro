@@ -67,6 +67,10 @@ h1, h2 {
   margin-bottom: 2rem;
 }
 
+.Cadastro{
+  color: #f4f7f9;
+}
+
 form {
   display: flex;
   flex-wrap: wrap;
@@ -91,7 +95,15 @@ form button:hover {
   background-color: #1b5e20;
 }
 
+.table-section{
+  background-image: url('Financeira-1.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
 table {
+  background-color: whitesmoke;
   width: 100%;
   border-collapse: collapse;
   margin-top: 1rem;
@@ -144,4 +156,42 @@ button.remover {
   color: white;
   padding: 0.3rem 0.6rem;
   border: none;
+}
+
+.filtro-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.filtro-container label {
+  font-weight: bold;
+  color: var(--cor-clara);
+}
+
+.filtro-container select {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: var(--radius);
+  background-color: var(--cor-clara);
+  color: var(--cor-fonte);
+  min-width: 100px;
+}
+
+.filtro-container button {
+  background-color: var(--cor-primaria);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.filtro-container button:hover {
+  background-color: #1b5e20;
 }

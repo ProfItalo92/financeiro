@@ -29,7 +29,26 @@
     </section>
 
     <section class="table-section">
-      <h2>Balancete Contábil</h2>
+      <h2 class="Cadastro">Balancete Contábil</h2>
+
+      <div class="filtro-container">
+        <label for="filtro-mes">Mês:</label>
+        <select id="filtro-mes">
+          <option value="">Todos</option>
+          <option value="01">01</option><option value="02">02</option><option value="03">03</option>
+          <option value="04">04</option><option value="05">05</option><option value="06">06</option>
+          <option value="07">07</option><option value="08">08</option><option value="09">09</option>
+          <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+        </select>
+
+        <label for="filtro-ano">Ano:</label>
+        <select id="filtro-ano">
+          <option value="">Todos</option>
+        </select>
+
+        <button onclick="aplicarFiltro()">Filtrar</button>
+      </div>
+
       <table id="tabela-balancete">
         <thead>
           <tr>
@@ -49,8 +68,17 @@
             <th id="total-credito">R$ 0,00</th>
             <th colspan="2"></th>
           </tr>
+          <tr>
+            <td colspan="4" style="text-align: right; font-weight: bold;">
+              Valor disponível para investimento:
+            </td>
+            <td colspan="2" style="text-align: left;">
+              <strong id="valor-investimento">R$ 0,00</strong>
+            </td>
+          </tr>
         </tfoot>
       </table>
+
       <button onclick="exportarPlanilha()">Exportar Planilha</button>
       <button onclick="imprimirPlanilha()">Imprimir Balancete</button>
     </section>
